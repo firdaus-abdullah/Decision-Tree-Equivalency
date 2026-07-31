@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SOP Flowchart · Instrument Equivalence</title>
+    <!-- html2canvas for reliable DOM-to-JPG export -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js">
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js">
     </script>
     <style>
@@ -113,6 +116,8 @@
             justify-content: center;
             align-items: center;
             padding: 6px 0 2px 0;
+            background: #ffffff;
+            border-radius: 8px;
         }
 
         .mermaid {
@@ -147,6 +152,29 @@
                 padding: 4px 10px;
             }
         }
+
+        /* ── export feedback ── */
+        .export-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0b1e33;
+            color: #ffffff;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .export-toast.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -167,7 +195,7 @@
             </button>
         </div>
 
-        <div class="mermaid-container">
+        <div class="mermaid-container" id="mermaidContainer">
             <div class="mermaid">
                 %% ─── DECISION TREE: INSTRUMENT EQUIVALENCE ───
                 %% Removed 3‑day evaluation logic and all emojis.
@@ -237,7 +265,11 @@
         </div>
     </div>
 
+    <!-- Toast notification -->
+    <div class="export-toast" id="toast"></div>
+
     <script>
+        // ── Mermaid Init ──
         mermaid.initialize({
             startOnLoad: true,
             theme: 'base',
@@ -260,77 +292,63 @@
             },
         });
 
-        // ── Export as JPG ──
+        // ── Toast helper ──
+        function showToast(message, duration) {
+            duration = duration || 2500;
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toast._hideTimer);
+            toast._hideTimer = setTimeout(function() {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // ── Export as JPG using html2canvas ──
         document.addEventListener('DOMContentLoaded', function() {
             const exportBtn = document.getElementById('exportJpgBtn');
+            const container = document.getElementById('mermaidContainer');
 
             exportBtn.addEventListener('click', function() {
-                // Find the SVG inside the mermaid container
-                const svgElement = document.querySelector('.mermaid svg');
-                if (!svgElement) {
-                    alert('Diagram not found. Please try again.');
-                    return;
-                }
+                // Disable button during export to prevent double-clicks
+                exportBtn.disabled = true;
+                exportBtn.style.opacity = '0.6';
+                showToast('Capturing diagram…', 1200);
 
-                // Clone the SVG to avoid affecting the displayed one
-                const svgClone = svgElement.cloneNode(true);
-
-                // Get dimensions from the SVG
-                const bbox = svgElement.getBBox();
-                // Use the viewBox or computed size
-                let width = parseInt(svgElement.getAttribute('width')) || bbox.width || 800;
-                let height = parseInt(svgElement.getAttribute('height')) || bbox.height || 600;
-                // Ensure we have reasonable values
-                if (width < 100) width = 800;
-                if (height < 100) height = 600;
-
-                // Scale factor for higher resolution (2x)
-                const scale = 2;
-                const canvasWidth = width * scale;
-                const canvasHeight = height * scale;
-
-                // Create a canvas
-                const canvas = document.createElement('canvas');
-                canvas.width = canvasWidth;
-                canvas.height = canvasHeight;
-                const ctx = canvas.getContext('2d');
-
-                // White background
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-
-                // Serialize SVG to string
-                const serializer = new XMLSerializer();
-                let svgString = serializer.serializeToString(svgClone);
-                // Add namespace if missing
-                if (!svgString.includes('xmlns=')) {
-                    svgString = svgString.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
-                }
-
-                // Create blob URL
-                const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-                const url = URL.createObjectURL(svgBlob);
-
-                // Load the SVG as image
-                const img = new Image();
-                img.onload = function() {
-                    // Draw on canvas with scaling
-                    ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
-                    URL.revokeObjectURL(url);
-
-                    // Export as JPG
+                // Use html2canvas to capture the container
+                html2canvas(container, {
+                    scale: 2.5, // high-res output
+                    useCORS: true,
+                    allowTaint: false,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    width: container.scrollWidth,
+                    height: container.scrollHeight,
+                    onclone: function(clonedDoc) {
+                        // Ensure cloned SVG is fully visible
+                        const clonedContainer = clonedDoc.getElementById('mermaidContainer');
+                        if (clonedContainer) {
+                            clonedContainer.style.overflow = 'visible';
+                        }
+                    }
+                }).then(function(canvas) {
+                    // Create download link
                     const link = document.createElement('a');
                     link.download = 'instrument_equivalence_flowchart.jpg';
                     link.href = canvas.toDataURL('image/jpeg', 0.95);
                     link.click();
-                };
 
-                img.onerror = function() {
-                    alert('Failed to render the diagram. Please try again or use screenshot.');
-                    URL.revokeObjectURL(url);
-                };
+                    // Re-enable button
+                    exportBtn.disabled = false;
+                    exportBtn.style.opacity = '1';
+                    showToast('Download complete!', 2000);
 
-                img.src = url;
+                }).catch(function(err) {
+                    console.error('html2canvas error:', err);
+                    exportBtn.disabled = false;
+                    exportBtn.style.opacity = '1';
+                    showToast('Export failed. See console for details.', 3000);
+                });
             });
         });
     </script>
