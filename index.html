@@ -1,60 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOP Flowchart: Instrument Equivalence</title>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOP Flowchart · Instrument Equivalence</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js">
+    </script>
     <style>
+        /* ── reset & base ── */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-        html, body {
+
+        html,
+        body {
             width: 100vw;
             height: 100vh;
-            overflow: hidden; /* Prevents page scrolling */
-            font-family: Arial, sans-serif;
-            background-color: #f8fafc;
+            overflow: hidden;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            background: #f1f5f9;
             display: flex;
             justify-content: center;
             align-items: center;
         }
+
+        /* ── card ── */
         .flowchart-card {
-            background-color: #ffffff;
-            border: 1px solid #cbd5e1;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            padding: 12px 16px;
+            background: #ffffff;
+            border: 1px solid #dce2ec;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.04);
+            padding: 16px 20px 20px 20px;
             width: 98vw;
             height: 96vh;
             display: flex;
             flex-direction: column;
+            transition: all 0.2s;
         }
+
+        /* ── header ── */
         .header {
             text-align: center;
-            margin-bottom: 4px;
             flex-shrink: 0;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #eef2f6;
         }
-        h2 {
-            color: #0f172a;
-            font-size: 1.05rem;
+
+        .header h2 {
+            color: #0b1e33;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
-        p.subtitle {
-            color: #64748b;
-            font-size: 0.75rem;
+
+        .header .subtitle {
+            color: #5b6f87;
+            font-size: 0.78rem;
+            font-weight: 400;
+            margin-top: 1px;
         }
+
+        /* ── mermaid container ── */
         .mermaid-container {
-            flex-grow: 1;
+            flex: 1 1 auto;
             width: 100%;
-            height: calc(100% - 35px);
+            min-height: 0;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 6px 0 2px 0;
         }
+
         .mermaid {
             width: 100%;
             height: 100%;
@@ -62,83 +81,144 @@
             justify-content: center;
             align-items: center;
         }
+
         .mermaid svg {
             max-width: 100% !important;
             max-height: 100% !important;
             height: auto !important;
+            width: auto !important;
+        }
+
+        /* ── responsive tweaks ── */
+        @media (max-width: 720px) {
+            .flowchart-card {
+                padding: 10px 12px 14px 12px;
+                border-radius: 10px;
+            }
+            .header h2 {
+                font-size: 0.9rem;
+            }
+            .header .subtitle {
+                font-size: 0.65rem;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="flowchart-card">
-    <div class="header">
-        <h2>Section 2.2: Instrument Equivalence Flowchart</h2>
-        <p class="subtitle">Routine Water Sample Evaluation (ELx808IU vs. PRS3)</p>
-    </div>
-    
-    <div class="mermaid-container">
-        <div class="mermaid">
-        graph LR
-            %% Styling Nodes
-            classDef startNode fill:#e2e8f0,stroke:#334155,stroke-width:1.5px,color:#0f172a,font-weight:bold,font-size:11px;
-            classDef processNode fill:#ffffff,stroke:#64748b,stroke-width:1px,color:#1e293b,font-size:10px;
-            classDef decisionNode fill:#eff6ff,stroke:#2563eb,stroke-width:1.5px,color:#1e40af,font-size:10px;
-            classDef passNode fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d,font-weight:bold,font-size:10px;
-            classDef failNode fill:#fee2e2,stroke:#dc2626,stroke-width:1.5px,color:#7f1d1d,font-weight:bold,font-size:10px;
+    <div class="flowchart-card">
+        <div class="header">
+            <h2>Section 2.2 · Instrument Equivalence</h2>
+            <p class="subtitle">Routine Water Sample Evaluation &mdash; ELx808IU vs. PRS3</p>
+        </div>
 
-            START([Sample pair for both PRS3 and ELx808IU]):::startNode --> CAT{Categorize Result}:::decisionNode
+        <div class="mermaid-container">
+            <div class="mermaid">
+                %% ─── DECISION TREE: INSTRUMENT EQUIVALENCE ───
+                %% Fixed syntax: FINAL_EVAL defined before references.
+                %% All nodes declared upfront with shapes & classes.
 
-            %% Category A
-            CAT -->|Both < LOQ| CAT_A[Cat A]:::processNode
-            CAT_A --> PASS_A[Equivalent<br/>No calc needed]:::passNode
+                graph LR
 
-            %% Category B
-            CAT -->|1 < LOQ, 1 > LOQ| CAT_B[Cat B]:::processNode
-            CAT_B --> DEC_B{> LOQ Value<br/>≥ 0.25 EU/mL?}:::decisionNode
-            DEC_B -->|No| PASS_B[Acceptable<br/>with Justification]:::passNode
-            DEC_B -->|Yes| FAIL_B[Pair Fail]:::failNode
+                %% ── Node Definitions (shapes & classes) ──
+                START([Sample pair<br/>PRS3 &amp; ELx808IU]):::startNode
+                CAT{Categorize<br/>Result}:::decisionNode
 
-            %% Category C
-            CAT -->|Both ≥ LOQ| CAT_C[Cat C]:::processNode
-            CAT_C --> CALC_IND[Calculate Recovery<br/><b>PRS3/ELx808IU × 100</b>]:::processNode
-            CALC_IND --> DEC_C_IND{Recovery<br/>50% to 200%?}:::decisionNode
-            DEC_C_IND -->|No| FAIL_C[Pair Fail]:::failNode
-            DEC_C_IND -->|Yes| EVAL_3DAY{Any Cat C Pairs<br/>in 3 Days?}:::decisionNode
-            
-            EVAL_3DAY -->|No| PASS_LOW[Equivalent<br/>Equivalence demonstrated for routine water samples yielding <LOQ results]:::passNode
-            EVAL_3DAY -->|Yes| CALC_MEAN[Calculate 3-Day<br/>Mean Recovery]:::processNode
-            CALC_MEAN --> DEC_C_MEAN{Mean Recovery<br/>85% to 115%?}:::decisionNode
-            DEC_C_MEAN -->|Yes| PASS_C[Cat C Met]:::passNode
-            DEC_C_MEAN -->|No| FAIL_STUDY[Verification Fail]:::failNode
+                CAT_A[Cat A<br/>Both &lt; LOQ]:::processNode
+                CAT_B[Cat B<br/>1 &lt; LOQ, 1 &gt; LOQ]:::processNode
+                CAT_C[Cat C<br/>Both ≥ LOQ]:::processNode
 
-            %% Outcomes Consolidation
-            PASS_A --> FINAL_EVAL
-            PASS_B --> FINAL_EVAL
-            PASS_LOW --> FINAL_EVAL
-            PASS_C --> FINAL_EVAL{All Criteria<br/>Met?}:::decisionNode
+                DEC_B{> LOQ Value<br/>≥ 0.25 EU/mL?}:::decisionNode
+                DEC_C_IND{Recovery<br/>50% – 200%?}:::decisionNode
+                EVAL_3DAY{Any Cat C Pairs<br/>in 3 Days?}:::decisionNode
+                DEC_C_MEAN{Mean Recovery<br/>85% – 115%?}:::decisionNode
 
-            FINAL_EVAL -->|Yes| EQUIV_SUCCESS([PRS3 Equivalent<br/>to ELx808IU]):::passNode
-            
-            FAIL_B --> INVESTIGATE[Investigate]:::failNode
-            FAIL_C --> INVESTIGATE
-            FAIL_STUDY --> INVESTIGATE
-            FINAL_EVAL -->|No| INVESTIGATE
+                CALC_IND[Calculate Recovery<br/><b>PRS3 / ELx808IU × 100</b>]:::processNode
+                CALC_MEAN[Calculate 3-Day<br/>Mean Recovery]:::processNode
+
+                PASS_A[✔ Equivalent<br/>No calc needed]:::passNode
+                PASS_B[✔ Acceptable<br/>with Justification]:::passNode
+                PASS_LOW[✔ Equivalent<br/>for &lt;LOQ samples]:::passNode
+                PASS_C[✔ Cat C Met]:::passNode
+
+                FAIL_B[✘ Pair Fail]:::failNode
+                FAIL_C[✘ Pair Fail]:::failNode
+                FAIL_STUDY[✘ Verification Fail]:::failNode
+
+                FINAL_EVAL{All Criteria<br/>Met?}:::decisionNode
+
+                EQUIV_SUCCESS([✔ PRS3 Equivalent<br/>to ELx808IU]):::passNode
+                INVESTIGATE[🔍 Investigate]:::failNode
+
+                %% ── Edges ──
+                START --> CAT
+
+                %% Category A
+                CAT -->|Both &lt; LOQ| CAT_A
+                CAT_A --> PASS_A
+                PASS_A --> FINAL_EVAL
+
+                %% Category B
+                CAT -->|1 &lt; LOQ, 1 &gt; LOQ| CAT_B
+                CAT_B --> DEC_B
+                DEC_B -->|No| PASS_B
+                DEC_B -->|Yes| FAIL_B
+                PASS_B --> FINAL_EVAL
+                FAIL_B --> INVESTIGATE
+
+                %% Category C
+                CAT -->|Both ≥ LOQ| CAT_C
+                CAT_C --> CALC_IND
+                CALC_IND --> DEC_C_IND
+                DEC_C_IND -->|No| FAIL_C
+                DEC_C_IND -->|Yes| EVAL_3DAY
+                EVAL_3DAY -->|No| PASS_LOW
+                EVAL_3DAY -->|Yes| CALC_MEAN
+                CALC_MEAN --> DEC_C_MEAN
+                DEC_C_MEAN -->|Yes| PASS_C
+                DEC_C_MEAN -->|No| FAIL_STUDY
+                PASS_LOW --> FINAL_EVAL
+                PASS_C --> FINAL_EVAL
+                FAIL_C --> INVESTIGATE
+                FAIL_STUDY --> INVESTIGATE
+
+                %% Final evaluation
+                FINAL_EVAL -->|Yes| EQUIV_SUCCESS
+                FINAL_EVAL -->|No| INVESTIGATE
+
+                %% ── Styling ──
+                classDef startNode fill:#e9edf4,stroke:#2c3e50,stroke-width:1.8px,color:#0b1e33,font-weight:700,font-size:11px;
+                classDef processNode fill:#ffffff,stroke:#7a8fa3,stroke-width:1px,color:#1a2b3c,font-size:10px;
+                classDef decisionNode fill:#eef5ff,stroke:#1a6bc4,stroke-width:1.8px,color:#0a3d7a,font-weight:600,font-size:10px;
+                classDef passNode fill:#dff0d8,stroke:#1f8b4c,stroke-width:1.8px,color:#0c5e2e,font-weight:700,font-size:10px;
+                classDef failNode fill:#fde8e8,stroke:#c73a3a,stroke-width:1.8px,color:#7a1a1a,font-weight:700,font-size:10px;
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    mermaid.initialize({
-        startOnLoad: true,
-        theme: 'neutral',
-        flowchart: {
-            useMaxWidth: true,
-            htmlLabels: true,
-            curve: 'basis'
-        }
-    });
-</script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                background: '#ffffff',
+                primaryColor: '#eef5ff',
+                primaryTextColor: '#0b1e33',
+                primaryBorderColor: '#1a6bc4',
+                lineColor: '#3d5a73',
+                secondaryColor: '#f8fafc',
+                tertiaryColor: '#f1f5f9',
+                fontSize: '11px',
+                fontFamily: 'Inter, Segoe UI, Arial, sans-serif',
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis',
+                padding: 12,
+            },
+        });
+    </script>
 
 </body>
 </html>
