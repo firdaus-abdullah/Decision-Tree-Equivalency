@@ -87,7 +87,7 @@
             classDef passNode fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d,font-weight:bold,font-size:10px;
             classDef failNode fill:#fee2e2,stroke:#dc2626,stroke-width:1.5px,color:#7f1d1d,font-weight:bold,font-size:10px;
 
-            START([Sample Pair Evaluated]):::startNode --> CAT{Categorize Result}:::decisionNode
+            START([Sample pair for both PRS3 and ELx808IU]):::startNode --> CAT{Categorize Result}:::decisionNode
 
             %% Category A
             CAT -->|Both < LOQ| CAT_A[Cat A]:::processNode
@@ -106,11 +106,11 @@
             DEC_C_IND -->|No| FAIL_C[Pair Fail]:::failNode
             DEC_C_IND -->|Yes| EVAL_3DAY{Any Cat C Pairs<br/>in 3 Days?}:::decisionNode
             
-            EVAL_3DAY -->|No| PASS_LOW[Equivalent<br/>Low-Level Water]:::passNode
+            EVAL_3DAY -->|No| PASS_LOW[Equivalent<br/>Equivalence demonstrated for routine water samples yielding <LOQ results]:::passNode
             EVAL_3DAY -->|Yes| CALC_MEAN[Calculate 3-Day<br/>Mean Recovery]:::processNode
-            CALC_MEAN --> DEC_C_MEAN{Mean Recovery<br/>75% to 125%?}:::decisionNode
+            CALC_MEAN --> DEC_C_MEAN{Mean Recovery<br/>85% to 115%?}:::decisionNode
             DEC_C_MEAN -->|Yes| PASS_C[Cat C Met]:::passNode
-            DEC_C_MEAN -->|No| FAIL_STUDY[Study Fail]:::failNode
+            DEC_C_MEAN -->|No| FAIL_STUDY[Verification Fail]:::failNode
 
             %% Outcomes Consolidation
             PASS_A --> FINAL_EVAL
@@ -120,7 +120,7 @@
 
             FINAL_EVAL -->|Yes| EQUIV_SUCCESS([PRS3 Equivalent<br/>to ELx808IU]):::passNode
             
-            FAIL_B --> INVESTIGATE[Investigate & Document<br/>per Section 13]:::failNode
+            FAIL_B --> INVESTIGATE[Investigate]:::failNode
             FAIL_C --> INVESTIGATE
             FAIL_STUDY --> INVESTIGATE
             FINAL_EVAL -->|No| INVESTIGATE
