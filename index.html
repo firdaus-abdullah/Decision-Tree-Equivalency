@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instrument Equivalence Decision Tree (ELx808IU vs PRS3)</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #cbd5e1;
+            --primary: #0284c7;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --pass-bg: #dcfce7;
+            --pass-border: #16a34a;
+            --pass-text: #14532d;
+            --fail-bg: #fee2e2;
+            --fail-border: #dc2626;
+            --fail-text: #7f1d1d;
+            --node-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--text-main);
+            margin-bottom: 24px;
+        }
+
+        .tree-container {
+            position: relative;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px 20px;
+            box-shadow: var(--node-shadow);
+            overflow-x: auto;
+        }
+
+        svg.connections {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .node-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .row {
+            grid-column: span 3;
+            display: flex;
+            justify-content: center;
+        }
+
+        .node {
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 14px 16px;
+            width: 260px;
+            box-sizing: border-box;
+            text-align: center;
+            font-size: 0.875rem;
+            box-shadow: var(--node-shadow);
+            position: relative;
+        }
+
+        .node-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .node-desc {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            line-height: 1.3;
+        }
+
+        .category-header {
+            background: #e0f2fe;
+            border-color: #0284c7;
+        }
+
+        .node-pass {
+            background: var(--pass-bg);
+            border-color: var(--pass-border);
+            color: var(--pass-text);
+        }
+
+        .node-pass .node-title {
+            color: var(--pass-text);
+        }
+
+        .node-fail {
+            background: var(--fail-bg);
+            border-color: var(--fail-border);
+            color: var(--fail-text);
+        }
+
+        .node-fail .node-title {
+            color: var(--fail-text);
+        }
+
+        .formula-box {
+            background: #f1f5f9;
+            border: 1px dashed var(--border-color);
+            border-radius: 6px;
+            padding: 6px;
+            margin: 6px 0;
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+
+        /* SVG Line styling */
+        line, path {
+            stroke: #94a3b8;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        marker {
+            fill: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>2.2 Instrument Equivalence Decision Tree</h1>
+
+    <div class="tree-container" id="tree-container">
+        <!-- SVG Connections Layer -->
+        <svg class="connections" id="svg-layer">
+            <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" />
+                </marker>
+            </defs>
+        </svg>
+
+        <div class="node-grid">
+            <!-- Level 1: Start -->
+            <div class="row">
+                <div class="node" id="start-node">
+                    <div class="node-title">Routine Water Sample Pair</div>
+                    <div class="node-desc">Compare ELx808IU vs. PRS3 Results for each sample on test day</div>
+                </div>
+            </div>
+
+            <!-- Spacer for visual layout -->
+            <div style="height: 40px; grid-column: span 3;"></div>
+
+            <!-- Level 2: Categories -->
+            <div class="node category-header" id="cat-a">
+                <div class="node-title">Category A</div>
+                <div class="node-desc">Both means &lt; LOQ</div>
+            </div>
+
+            <div class="node category-header" id="cat-b">
+                <div class="node-title">Category B</div>
+                <div class="node-desc">One mean &lt; LOQ and other &gt; LOQ but &lt; 0.25 EU/mL</div>
+            </div>
+
+            <div class="node category-header" id="cat-c">
+                <div class="node-title">Category C</div>
+                <div class="node-desc">Both means ≥ LOQ</div>
+            </div>
+
+            <!-- Level 3: Evaluated Outcomes / Calculations -->
+            <div class="node node-pass" id="out-a">
+                <div class="node-title">Equivalent</div>
+                <div class="node-desc">No further calculation required.</div>
+            </div>
+
+            <div>
+                <div class="node" id="eval-b" style="margin: 0 auto 20px auto;">
+                    <div class="node-title">Check Spec Limit</div>
+                    <div class="node-desc">Is the &gt;LOQ value ≥ 0.25 EU/mL?</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="node" id="eval-c" style="margin: 0 auto 20px auto;">
+                    <div class="node-title">Calculate Recovery</div>
+                    <div class="formula-box">(PRS3 / ELx808IU) × 100</div>
+                    <div class="node-desc">Criterion: 50% ≤ Recovery ≤ 200%</div>
+                </div>
+            </div>
+
+            <!-- Level 4: Category B & C Branching Results -->
+            <div style="grid-column: 1;"></div> <!-- Empty space for alignment -->
+
+            <div>
+                <div class="node node-pass" id="out-b-pass" style="margin-bottom: 12px;">
+                    <div class="node-title">Acceptable</div>
+                    <div class="node-desc">If &gt;LOQ is &lt; 0.25 EU/mL (with justification).</div>
+                </div>
+                <div class="node node-fail" id="out-b-fail">
+                    <div class="node-title">Fail & Investigate</div>
+                    <div class="node-desc">If &gt;LOQ is ≥ 0.25 EU/mL.</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="node node-fail" id="out-c-fail" style="margin-bottom: 12px;">
+                    <div class="node-title">Pair Failure</div>
+                    <div class="node-desc">Any single pair &lt; 50% or &gt; 200%. Investigate per Sec 13.</div>
+                </div>
+                <div class="node" id="eval-c-overall">
+                    <div class="node-title">Overall Study Criterion</div>
+                    <div class="formula-box">Mean Recovery of Cat C Pairs</div>
+                    <div class="node-desc">Must be between 75% and 125% across 3 test days.*</div>
+                </div>
+            </div>
+
+            <!-- Level 5: Final Overall Verdict -->
+            <div class="row" style="margin-top: 30px;">
+                <div class="node node-pass" id="final-node" style="width: 400px; border-width: 3px;">
+                    <div class="node-title" style="font-size: 1.1rem;">OVERALL STUDY EQUIVALENCE</div>
+                    <div class="node-desc" style="text-align: left; margin-top: 8px;">
+                        PRS3 is equivalent to ELx808IU if:
+                        <ul style="margin: 4px 0 0 0; padding-left: 18px;">
+                            <li>All Category A and B criteria met</li>
+                            <li>Every Cat C pair recovery is 50–200%</li>
+                            <li>Mean Cat C recovery is 75–125%</li>
+                        </ul>
+                        <i style="display:block; margin-top:6px; font-size:0.75rem;">*If 0 Cat C pairs exist, low-level equivalence is demonstrated.</i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Dynamically draw connector lines between nodes
+    function drawConnections() {
+        const svg = document.getElementById('svg-layer');
+        const container = document.getElementById('tree-container').getBoundingClientRect();
+        
+        // Helper to clear existing lines
+        while (svg.childNodes.length > 2) {
+            svg.removeChild(svg.lastChild);
+        }
+
+        const connections = [
+            // Start to Categories
+            { from: 'start-node', to: 'cat-a', type: 'bottom-to-top' },
+            { from: 'start-node', to: 'cat-b', type: 'bottom-to-top' },
+            { from: 'start-node', to: 'cat-c', type: 'bottom-to-top' },
+
+            // Category A
+            { from: 'cat-a', to: 'out-a', type: 'bottom-to-top' },
+
+            // Category B
+            { from: 'cat-b', to: 'eval-b', type: 'bottom-to-top' },
+            { from: 'eval-b', to: 'out-b-pass', type: 'bottom-to-top' },
+            { from: 'eval-b', to: 'out-b-fail', type: 'bottom-to-top' },
+
+            // Category C
+            { from: 'cat-c', to: 'eval-c', type: 'bottom-to-top' },
+            { from: 'eval-c', to: 'out-c-fail', type: 'bottom-to-top' },
+            { from: 'eval-c', to: 'eval-c-overall', type: 'bottom-to-top' },
+
+            // To Final Verdict
+            { from: 'out-a', to: 'final-node', type: 'bottom-to-top' },
+            { from: 'out-b-pass', to: 'final-node', type: 'bottom-to-top' },
+            { from: 'eval-c-overall', to: 'final-node', type: 'bottom-to-top' }
+        ];
+
+        connections.forEach(conn => {
+            const el1 = document.getElementById(conn.from);
+            const el2 = document.getElementById(conn.to);
+
+            if (!el1 || !el2) return;
+
+            const r1 = el1.getBoundingClientRect();
+            const r2 = el2.getBoundingClientRect();
+
+            // Calculate center points relative to container
+            const x1 = r1.left + r1.width / 2 - container.left;
+            const y1 = r1.bottom - container.top;
+            const x2 = r2.left + r2.width / 2 - container.left;
+            const y2 = r2.top - container.top;
+
+            // Draw curved orthogonal paths
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const midY = y1 + (y2 - y1) / 2;
+            
+            const d = `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`;
+            
+            path.setAttribute('d', d);
+            path.setAttribute('marker-end', 'url(#arrow)');
+            svg.appendChild(path);
+        });
+    }
+
+    // Render lines on load and resize
+    window.addEventListener('load', drawConnections);
+    window.addEventListener('resize', drawConnections);
+</script>
+
+</body>
+</html>
