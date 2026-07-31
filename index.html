@@ -37,30 +37,71 @@
             height: 96vh;
             display: flex;
             flex-direction: column;
-            transition: all 0.2s;
+            position: relative;
         }
 
         /* ── header ── */
         .header {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             flex-shrink: 0;
-            padding-bottom: 6px;
+            padding-bottom: 8px;
             border-bottom: 1px solid #eef2f6;
         }
 
-        .header h2 {
+        .header-left {
+            text-align: left;
+        }
+
+        .header-left h2 {
             color: #0b1e33;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 600;
             letter-spacing: 0.3px;
             text-transform: uppercase;
         }
 
-        .header .subtitle {
+        .header-left .subtitle {
             color: #5b6f87;
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             font-weight: 400;
             margin-top: 1px;
+        }
+
+        .export-btn {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #1e293b;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        .export-btn:hover {
+            background: #eef2f6;
+            border-color: #94a3b8;
+        }
+
+        .export-btn:active {
+            background: #e2e8f0;
+        }
+
+        .export-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: #475569;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         /* ── mermaid container ── */
@@ -95,11 +136,15 @@
                 padding: 10px 12px 14px 12px;
                 border-radius: 10px;
             }
-            .header h2 {
-                font-size: 0.9rem;
+            .header-left h2 {
+                font-size: 0.85rem;
             }
-            .header .subtitle {
+            .header-left .subtitle {
+                font-size: 0.6rem;
+            }
+            .export-btn {
                 font-size: 0.65rem;
+                padding: 4px 10px;
             }
         }
     </style>
@@ -108,15 +153,25 @@
 
     <div class="flowchart-card">
         <div class="header">
-            <h2>Section 2.2 · Instrument Equivalence</h2>
-            <p class="subtitle">Routine Water Sample Evaluation &mdash; ELx808IU vs. PRS3</p>
+            <div class="header-left">
+                <h2>Section 2.2 · Instrument Equivalence</h2>
+                <p class="subtitle">Routine Water Sample Evaluation &mdash; ELx808IU vs. PRS3</p>
+            </div>
+            <button class="export-btn" id="exportJpgBtn">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                </svg>
+                Export as JPG
+            </button>
         </div>
 
         <div class="mermaid-container">
             <div class="mermaid">
                 %% ─── DECISION TREE: INSTRUMENT EQUIVALENCE ───
-                %% Fixed syntax: FINAL_EVAL defined before references.
-                %% All nodes declared upfront with shapes & classes.
+                %% Removed 3‑day evaluation logic and all emojis.
+                %% Clean, professional flow.
 
                 graph LR
 
@@ -129,26 +184,20 @@
                 CAT_C[Cat C<br/>Both ≥ LOQ]:::processNode
 
                 DEC_B{> LOQ Value<br/>≥ 0.25 EU/mL?}:::decisionNode
-                DEC_C_IND{Recovery<br/>50% – 200%?}:::decisionNode
-                EVAL_3DAY{Any Cat C Pairs<br/>in 3 Days?}:::decisionNode
-                DEC_C_MEAN{Mean Recovery<br/>85% – 115%?}:::decisionNode
+                DEC_C_IND{Recovery<br/>50% to 200%?}:::decisionNode
 
                 CALC_IND[Calculate Recovery<br/><b>PRS3 / ELx808IU × 100</b>]:::processNode
-                CALC_MEAN[Calculate 3-Day<br/>Mean Recovery]:::processNode
 
-                PASS_A[✔ Equivalent<br/>No calc needed]:::passNode
-                PASS_B[✔ Acceptable<br/>with Justification]:::passNode
-                PASS_LOW[✔ Equivalent<br/>for &lt;LOQ samples]:::passNode
-                PASS_C[✔ Cat C Met]:::passNode
+                PASS_A[Equivalent<br/>No calc needed]:::passNode
+                PASS_B[Acceptable<br/>with Justification]:::passNode
 
-                FAIL_B[✘ Pair Fail]:::failNode
-                FAIL_C[✘ Pair Fail]:::failNode
-                FAIL_STUDY[✘ Verification Fail]:::failNode
+                FAIL_B[Pair Fail]:::failNode
+                FAIL_C[Pair Fail]:::failNode
 
                 FINAL_EVAL{All Criteria<br/>Met?}:::decisionNode
 
-                EQUIV_SUCCESS([✔ PRS3 Equivalent<br/>to ELx808IU]):::passNode
-                INVESTIGATE[🔍 Investigate]:::failNode
+                EQUIV_SUCCESS([PRS3 Equivalent<br/>to ELx808IU]):::passNode
+                INVESTIGATE[Investigate]:::failNode
 
                 %% ── Edges ──
                 START --> CAT
@@ -166,23 +215,15 @@
                 PASS_B --> FINAL_EVAL
                 FAIL_B --> INVESTIGATE
 
-                %% Category C
+                %% Category C (3‑day logic removed)
                 CAT -->|Both ≥ LOQ| CAT_C
                 CAT_C --> CALC_IND
                 CALC_IND --> DEC_C_IND
                 DEC_C_IND -->|No| FAIL_C
-                DEC_C_IND -->|Yes| EVAL_3DAY
-                EVAL_3DAY -->|No| PASS_LOW
-                EVAL_3DAY -->|Yes| CALC_MEAN
-                CALC_MEAN --> DEC_C_MEAN
-                DEC_C_MEAN -->|Yes| PASS_C
-                DEC_C_MEAN -->|No| FAIL_STUDY
-                PASS_LOW --> FINAL_EVAL
-                PASS_C --> FINAL_EVAL
+                DEC_C_IND -->|Yes| FINAL_EVAL
                 FAIL_C --> INVESTIGATE
-                FAIL_STUDY --> INVESTIGATE
 
-                %% Final evaluation
+                %% Final outcome
                 FINAL_EVAL -->|Yes| EQUIV_SUCCESS
                 FINAL_EVAL -->|No| INVESTIGATE
 
@@ -217,6 +258,80 @@
                 curve: 'basis',
                 padding: 12,
             },
+        });
+
+        // ── Export as JPG ──
+        document.addEventListener('DOMContentLoaded', function() {
+            const exportBtn = document.getElementById('exportJpgBtn');
+
+            exportBtn.addEventListener('click', function() {
+                // Find the SVG inside the mermaid container
+                const svgElement = document.querySelector('.mermaid svg');
+                if (!svgElement) {
+                    alert('Diagram not found. Please try again.');
+                    return;
+                }
+
+                // Clone the SVG to avoid affecting the displayed one
+                const svgClone = svgElement.cloneNode(true);
+
+                // Get dimensions from the SVG
+                const bbox = svgElement.getBBox();
+                // Use the viewBox or computed size
+                let width = parseInt(svgElement.getAttribute('width')) || bbox.width || 800;
+                let height = parseInt(svgElement.getAttribute('height')) || bbox.height || 600;
+                // Ensure we have reasonable values
+                if (width < 100) width = 800;
+                if (height < 100) height = 600;
+
+                // Scale factor for higher resolution (2x)
+                const scale = 2;
+                const canvasWidth = width * scale;
+                const canvasHeight = height * scale;
+
+                // Create a canvas
+                const canvas = document.createElement('canvas');
+                canvas.width = canvasWidth;
+                canvas.height = canvasHeight;
+                const ctx = canvas.getContext('2d');
+
+                // White background
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+                // Serialize SVG to string
+                const serializer = new XMLSerializer();
+                let svgString = serializer.serializeToString(svgClone);
+                // Add namespace if missing
+                if (!svgString.includes('xmlns=')) {
+                    svgString = svgString.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+                }
+
+                // Create blob URL
+                const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(svgBlob);
+
+                // Load the SVG as image
+                const img = new Image();
+                img.onload = function() {
+                    // Draw on canvas with scaling
+                    ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+                    URL.revokeObjectURL(url);
+
+                    // Export as JPG
+                    const link = document.createElement('a');
+                    link.download = 'instrument_equivalence_flowchart.jpg';
+                    link.href = canvas.toDataURL('image/jpeg', 0.95);
+                    link.click();
+                };
+
+                img.onerror = function() {
+                    alert('Failed to render the diagram. Please try again or use screenshot.');
+                    URL.revokeObjectURL(url);
+                };
+
+                img.src = url;
+            });
         });
     </script>
 
