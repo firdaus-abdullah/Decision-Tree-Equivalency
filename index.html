@@ -210,16 +210,16 @@
 
                 CALC_IND[Calculate Recovery<br/><b>PRS3 / ELx808IU × 100</b>]:::processNode
 
-                PASS_A[✔ Equivalent<br/>No calc needed]:::passNode
-                PASS_B[✔ Acceptable<br/>with justification]:::passNode
+                PASS_A[Equivalent<br/>No calculation needed]:::passNode
+                PASS_B[Acceptable<br/>with justification]:::passNode
 
-                FAIL_B[✘ Pair Fail<br/>≥ 0.25 EU/mL]:::failNode
-                FAIL_C[✘ Pair Fail<br/>Recovery outside 50‑200%]:::failNode
+                FAIL_B[Pair Fail<br/>≥ 0.25 EU/mL]:::failNode
+                FAIL_C[Pair Fail<br/>Recovery outside 50‑200%]:::failNode
 
                 FINAL_EVAL{All three sample pairs<br/>meet their category rule?}:::decisionNode
 
-                EQUIV_SUCCESS([✔ PRS3 Equivalent<br/>to ELx808IU]):::passNode
-                INVESTIGATE[🔍 Investigate<br/>&amp; document per Section 13]:::failNode
+                EQUIV_SUCCESS([PRS3 Equivalent<br/>to ELx808IU]):::passNode
+                INVESTIGATE[Investigate<br/>&amp; document per Section 13]:::failNode
 
                 %% ── Edges ──
                 START --> CAT
