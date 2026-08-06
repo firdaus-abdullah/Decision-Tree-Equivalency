@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SOP Flowchart · Instrument Equivalence</title>
-    <!-- html2canvas for reliable DOM-to-JPG export -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js">
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js">
@@ -29,7 +28,6 @@
             align-items: center;
         }
 
-        /* ── card ── */
         .flowchart-card {
             background: #ffffff;
             border: 1px solid #dce2ec;
@@ -43,7 +41,6 @@
             position: relative;
         }
 
-        /* ── header ── */
         .header {
             display: flex;
             justify-content: space-between;
@@ -107,7 +104,6 @@
             stroke-linejoin: round;
         }
 
-        /* ── mermaid container ── */
         .mermaid-container {
             flex: 1 1 auto;
             width: 100%;
@@ -135,7 +131,6 @@
             width: auto !important;
         }
 
-        /* ── responsive tweaks ── */
         @media (max-width: 720px) {
             .flowchart-card {
                 padding: 10px 12px 14px 12px;
@@ -153,7 +148,6 @@
             }
         }
 
-        /* ── export feedback ── */
         .export-toast {
             position: fixed;
             bottom: 30px;
@@ -183,7 +177,7 @@
         <div class="header">
             <div class="header-left">
                 <h2>Section 2.2 · Instrument Equivalence</h2>
-                <p class="subtitle">Routine Water Sample Evaluation &mdash; ELx808IU vs. PRS3</p>
+                <p class="subtitle">Single Test Day Evaluation &mdash; ELx808IU vs. PRS3</p>
             </div>
             <button class="export-btn" id="exportJpgBtn">
                 <svg viewBox="0 0 24 24">
@@ -197,35 +191,35 @@
 
         <div class="mermaid-container" id="mermaidContainer">
             <div class="mermaid">
-                %% ─── DECISION TREE: INSTRUMENT EQUIVALENCE ───
-                %% Removed 3‑day evaluation logic and all emojis.
-                %% Clean, professional flow.
+                %% ─── REVISED DECISION TREE (Single Test Day) ───
+                %% Per‑category rules as per SOP description.
+                %% All pairs must pass; any failure triggers investigation.
 
                 graph LR
 
-                %% ── Node Definitions (shapes & classes) ──
+                %% ── Nodes ──
                 START([Sample pair<br/>PRS3 &amp; ELx808IU]):::startNode
                 CAT{Categorize<br/>Result}:::decisionNode
 
-                CAT_A[Cat A<br/>Both &lt; LOQ]:::processNode
-                CAT_B[Cat B<br/>1 &lt; LOQ, 1 &gt; LOQ]:::processNode
-                CAT_C[Cat C<br/>Both ≥ LOQ]:::processNode
+                CAT_A[Category A<br/>Both &lt; LOQ]:::processNode
+                CAT_B[Category B<br/>One &lt; LOQ, one &gt; LOQ]:::processNode
+                CAT_C[Category C<br/>Both ≥ LOQ]:::processNode
 
-                DEC_B{> LOQ Value<br/>≥ 0.25 EU/mL?}:::decisionNode
-                DEC_C_IND{Recovery<br/>50% to 200%?}:::decisionNode
+                DEC_B{&gt;LOQ value<br/>&lt; 0.25 EU/mL?}:::decisionNode
+                DEC_C_IND{Recovery<br/>50% – 200%?}:::decisionNode
 
                 CALC_IND[Calculate Recovery<br/><b>PRS3 / ELx808IU × 100</b>]:::processNode
 
-                PASS_A[Equivalent<br/>No calc needed]:::passNode
-                PASS_B[Acceptable<br/>with Remark]:::passNode
+                PASS_A[✔ Equivalent<br/>No calc needed]:::passNode
+                PASS_B[✔ Acceptable<br/>with justification]:::passNode
 
-                FAIL_B[Pair Fail]:::failNode
-                FAIL_C[Pair Fail]:::failNode
+                FAIL_B[✘ Pair Fail<br/>≥ 0.25 EU/mL]:::failNode
+                FAIL_C[✘ Pair Fail<br/>Recovery outside 50‑200%]:::failNode
 
-                FINAL_EVAL{All Criteria<br/>Met?}:::decisionNode
+                FINAL_EVAL{All three sample pairs<br/>meet their category rule?}:::decisionNode
 
-                EQUIV_SUCCESS([PRS3 Equivalent<br/>to ELx808IU]):::passNode
-                INVESTIGATE[Investigate]:::failNode
+                EQUIV_SUCCESS([✔ PRS3 Equivalent<br/>to ELx808IU]):::passNode
+                INVESTIGATE[🔍 Investigate<br/>&amp; document per Section 13]:::failNode
 
                 %% ── Edges ──
                 START --> CAT
@@ -236,19 +230,19 @@
                 PASS_A --> FINAL_EVAL
 
                 %% Category B
-                CAT -->|1 &lt; LOQ, 1 &gt; LOQ| CAT_B
+                CAT -->|One &lt; LOQ, one &gt; LOQ| CAT_B
                 CAT_B --> DEC_B
-                DEC_B -->|No| PASS_B
-                DEC_B -->|Yes| FAIL_B
+                DEC_B -->|Yes| PASS_B
+                DEC_B -->|No| FAIL_B
                 PASS_B --> FINAL_EVAL
                 FAIL_B --> INVESTIGATE
 
-                %% Category C (3‑day logic removed)
+                %% Category C
                 CAT -->|Both ≥ LOQ| CAT_C
                 CAT_C --> CALC_IND
                 CALC_IND --> DEC_C_IND
-                DEC_C_IND -->|No| FAIL_C
                 DEC_C_IND -->|Yes| FINAL_EVAL
+                DEC_C_IND -->|No| FAIL_C
                 FAIL_C --> INVESTIGATE
 
                 %% Final outcome
@@ -265,7 +259,6 @@
         </div>
     </div>
 
-    <!-- Toast notification -->
     <div class="export-toast" id="toast"></div>
 
     <script>
@@ -310,44 +303,31 @@
             const container = document.getElementById('mermaidContainer');
 
             exportBtn.addEventListener('click', function() {
-                // Disable button during export to prevent double-clicks
                 exportBtn.disabled = true;
                 exportBtn.style.opacity = '0.6';
                 showToast('Capturing diagram…', 1200);
 
-                // Use html2canvas to capture the container
                 html2canvas(container, {
-                    scale: 2.5, // high-res output
+                    scale: 2.5,
                     useCORS: true,
                     allowTaint: false,
                     backgroundColor: '#ffffff',
                     logging: false,
                     width: container.scrollWidth,
                     height: container.scrollHeight,
-                    onclone: function(clonedDoc) {
-                        // Ensure cloned SVG is fully visible
-                        const clonedContainer = clonedDoc.getElementById('mermaidContainer');
-                        if (clonedContainer) {
-                            clonedContainer.style.overflow = 'visible';
-                        }
-                    }
                 }).then(function(canvas) {
-                    // Create download link
                     const link = document.createElement('a');
                     link.download = 'instrument_equivalence_flowchart.jpg';
                     link.href = canvas.toDataURL('image/jpeg', 0.95);
                     link.click();
-
-                    // Re-enable button
                     exportBtn.disabled = false;
                     exportBtn.style.opacity = '1';
                     showToast('Download complete!', 2000);
-
                 }).catch(function(err) {
                     console.error('html2canvas error:', err);
                     exportBtn.disabled = false;
                     exportBtn.style.opacity = '1';
-                    showToast('Export failed. See console for details.', 3000);
+                    showToast('Export failed. See console.', 3000);
                 });
             });
         });
